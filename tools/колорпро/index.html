@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>КолорПро — генератор цветовой схемы и готовой темы из изображения</title>
+  
+  <!-- Tailwind CSS: dev-режим (CDN). Для прода замените на <link rel="stylesheet" href="../../assets/css/tailwind.min.css"> -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Единые стили free-Tools 2.0 -->
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f4f6fb;
+      --surface:#ffffff;
+      --surface-hover:#f8f9fe;
+      --primary:#4f46e5;
+      --primary-hover:#4338ca;
+      --primary-light:#eef2ff;
+      --primary-glow:rgba(79,70,229,.18);
+      --accent:#06b6d4;
+      --accent-light:#ecfeff;
+      --success:#10b981;
+      --success-light:#ecfdf5;
+      --warning:#f59e0b;
+      --warning-light:#fffbeb;
+      --danger:#ef4444;
+      --text:#1e1b4b;
+      --text-secondary:#6b7280;
+      --text-muted:#9ca3af;
+      --border:#e2e5f1;
+      --border-focus:#a5b4fc;
+      --radius:14px;
+      --radius-sm:10px;
+      --radius-xs:8px;
+      --shadow:0 1px 3px rgba(30,27,75,.06),0 4px 16px rgba(30,27,75,.04);
+      --shadow-lg:0 4px 24px rgba(30,27,75,.08),0 12px 48px rgba(30,27,75,.05);
+      --shadow-focus:0 0 0 3px var(--primary-glow);
+      --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      --mono:'JetBrains Mono','Fira Code','SF Mono',Consolas,monospace;
+    }
+    html{scroll-behavior:smooth}
+    body{
+      font-family:var(--font);
+      background:var(--bg);
+      color:var(--text);
+      line-height:1.6;
+      min-height:100vh;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    /* ── Header (единый стиль free-Tools 2.0) ── */
+    .header{
+      background:linear-gradient(135deg,var(--primary) 0%,#7c3aed 50%,var(--accent) 100%);
+      padding:48px 24px 56px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .header::before{
+      content:'';
+      position:absolute;inset:0;
+      background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .header::after{
+      content:'';position:absolute;bottom:-2px;left:0;right:0;height:32px;
+      background:var(--bg);
+      border-radius:32px 32px 0 0;
+    }
+    .header-content{position:relative;z-index:1;max-width:700px;margin:0 auto}
+    .logo{
+      display:inline-flex;align-items:center;gap:10px;
+      font-size:14px;font-weight:700;color:rgba(255,255,255,.85);
+      text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;
+    }
+    .logo svg{width:20px;height:20px}
+    .header h1{
+      font-size:clamp(28px,5vw,42px);font-weight:800;color:#fff;
+      line-height:1.15;margin-bottom:12px;letter-spacing:-.5px;
+    }
+    .header p{
+      font-size:17px;color:rgba(255,255,255,.8);max-width:520px;margin:0 auto;
+      line-height:1.6;
+    }
+
+    /* ── Container ── */
+    .container{max-width:960px;margin:0 auto;padding:0 20px 60px}
+
+    /* ── Card ── */
+    .card{
+      background:var(--surface);border-radius:var(--radius);
+      box-shadow:var(--shadow);border:1px solid var(--border);
+      padding:28px;margin-bottom:24px;
+      transition:box-shadow .3s ease;
+    }
+    .card:hover{box-shadow:var(--shadow-lg)}
+    .card-title{
+      font-size:18px;font-weight:700;margin-bottom:6px;
+      display:flex;align-items:center;gap:10px;
+    }
+    .card-title .icon{
+      width:36px;height:36px;border-radius:var(--radius-xs);
+      display:flex;align-items:center;justify-content:center;
+      font-size:18px;flex-shrink:0;
+    }
+    .card-title .icon.blue{background:var(--primary-light);color:var(--primary)}
+    .card-title .icon.cyan{background:var(--accent-light);color:var(--accent)}
+    .card-title .icon.green{background:var(--success-light);color:var(--success)}
+    .card-title .icon.amber{background:var(--warning-light);color:var(--warning)}
+    .card-desc{font-size:14px;color:var(--text-secondary);margin-bottom:20px}
+
+    /* ── Dropzone ── */
+    .dropzone{
+      border:2px dashed var(--border);border-radius:var(--radius);
+      padding:32px;text-align:center;background:var(--surface-hover);
+      cursor:pointer;transition:all .25s ease;position:relative;overflow:hidden;
+    }
+    .dropzone:hover{border-color:var(--primary-light);background:#fff}
+    .dropzone.drag-over{border-color:var(--primary)!important;background:var(--primary-light)!important}
+    .dropzone .emoji{font-size:48px;margin-bottom:12px;display:block}
+    .dropzone .hint{font-size:14px;color:var(--text-secondary)}
+    .dropzone .hint strong{color:var(--primary)}
+
+    /* ── Buttons ── */
+    .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:13px 28px;border-radius:var(--radius-sm);
+      font-size:15px;font-weight:600;border:none;cursor:pointer;
+      transition:all .25s ease;font-family:var(--font);
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,var(--primary),#7c3aed);
+      color:#fff;box-shadow:0 4px 14px var(--primary-glow);
+    }
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,70,229,.3)}
+    .btn-primary:active{transform:translateY(0)}
+    .btn-secondary{
+      background:var(--surface);color:var(--text);
+      border:1.5px solid var(--border);
+    }
+    .btn-secondary:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+    .btn svg{width:18px;height:18px}
+
+    /* ── Palette Grid ── */
+    #paletteGrid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+    .color-card{
+      flex:1;min-width:100px;max-width:140px;
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius-sm);overflow:hidden;
+      cursor:pointer;transition:all .2s ease;
+    }
+    .color-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+    .color-card.active-accent{outline:3px solid var(--primary);outline-offset:2px;transform:scale(1.02)}
+    .color-card .swatch{height:80px;width:100%}
+    .color-card .hex{
+      padding:12px;text-align:center;font-family:var(--mono);
+      font-size:13px;font-weight:600;color:var(--text);
+    }
+    .color-card .hex small{display:block;font-size:11px;color:var(--text-muted);font-weight:400;margin-top:2px}
+
+    /* ── Demo Interface ── */
+    .demo-nav{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);padding:12px 16px;
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+    }
+    .demo-nav .brand{display:flex;align-items:center;gap:8px}
+    .demo-nav .logo-dot{width:24px;height:24px;border-radius:6px}
+    .demo-nav .links{display:flex;gap:16px;font-size:14px}
+    .demo-nav .links a{color:var(--text-secondary);text-decoration:none;font-weight:500}
+    .demo-nav .links a.active{color:var(--primary)}
+    .demo-nav .btn{padding:8px 16px;font-size:13px}
+
+    .demo-card{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);overflow:hidden;
+      transition:transform .2s,box-shadow .2s;
+    }
+    .demo-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+    .demo-card .gradient{height:160px}
+    .demo-card .content{padding:16px}
+    .demo-card .title{font-weight:700;font-size:18px;margin-bottom:4px}
+    .demo-card .desc{font-size:14px;color:var(--text-secondary);margin-bottom:16px}
+    .demo-card .price{font-size:20px;font-weight:800}
+    .demo-card .btn{padding:10px 20px;font-size:14px}
+
+    .demo-review{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);padding:16px;
+    }
+    .demo-review .avatar{
+      width:40px;height:40px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font-weight:700;font-size:14px;
+    }
+    .demo-review .author{font-weight:600;font-size:14px}
+    .demo-review .role{font-size:12px;color:var(--text-muted)}
+    .demo-review .text{font-size:14px;color:var(--text-secondary);margin:8px 0}
+    .demo-review .tags{display:flex;gap:8px;flex-wrap:wrap}
+    .demo-review .tag{
+      padding:4px 12px;border-radius:20px;font-size:12px;font-weight:500;
+    }
+    .demo-review .tag.primary{background:var(--primary);color:#fff}
+    .demo-review .like{
+      display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text-muted);
+      cursor:pointer;transition:color .2s;
+    }
+    .demo-review .like.liked{color:var(--accent)}
+    .demo-review .like svg{width:18px;height:18px}
+
+    .demo-subscribe{
+      background:linear-gradient(135deg,var(--primary),var(--warning));
+      border-radius:var(--radius);padding:20px;color:#fff;
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;
+    }
+    .demo-subscribe .text h4{font-weight:700;font-size:16px;margin-bottom:4px}
+    .demo-subscribe .text p{font-size:14px;opacity:.9}
+    .demo-subscribe .form{display:flex;gap:8px;flex-wrap:wrap}
+    .demo-subscribe input{
+      padding:10px 16px;border-radius:9999px;border:none;
+      font-size:14px;min-width:200px;
+    }
+    .demo-subscribe .btn{
+      background:#fff;color:var(--primary);padding:10px 20px;
+      border-radius:9999px;font-weight:600;font-size:14px;
+    }
+
+    /* ── Code Panel ── */
+    .code-tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px}
+    .code-tab{
+      padding:10px 16px;font-size:14px;font-weight:600;
+      color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;
+      transition:all .2s;
+    }
+    .code-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+    .code-block{
+      background:#1e1e2f;color:#e2e8f0;
+      border-radius:var(--radius-sm);padding:16px;
+      font-family:var(--mono);font-size:13px;line-height:1.7;
+      overflow-x:auto;white-space:pre-wrap;max-height:400px;
+    }
+
+    /* ── Toast ── */
+    .toast{
+      position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(100px);
+      background:var(--text);color:#fff;padding:14px 28px;
+      border-radius:50px;font-size:14px;font-weight:600;
+      box-shadow:0 8px 32px rgba(0,0,0,.2);z-index:999;
+      transition:transform .4s cubic-bezier(.16,1,.3,1);
+      pointer-events:none;
+    }
+    .toast.show{transform:translateX(-50%) translateY(0)}
+
+    /* ── Footer ── */
+    .footer{
+      text-align:center;padding:32px 20px 40px;
+      font-size:13px;color:var(--text-muted);
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .4s ease forwards}
+
+    /* ── Responsive ── */
+    @media(max-width:640px){
+      .header{padding:36px 16px 44px}
+      .card{padding:20px}
+      .btn-row{flex-direction:column}
+      .btn{width:100%;justify-content:center}
+      .demo-subscribe{flex-direction:column;align-items:flex-start}
+      .demo-subscribe .form{width:100%}
+      .demo-subscribe input{width:100%}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header class="header">
+  <div class="header-content">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      КолорПРО
+    </div>
+    <h1>Генератор цветовой схемы</h1>
+    <p>Преврати свой логотип в готовую тему оформления. Палитра, пример интерфейса и код для Tailwind/CSS — без отправки на сервер.</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ════════ UPLOAD CARD ════════ -->
+  <div class="card">
+    <div class="card-title">
+      <span class="icon blue">🖼️</span>
+      Загрузите логотип или любое изображение
+    </div>
+    <div class="card-desc">PNG, JPEG, WEBP. Изображение останется на вашем устройстве, мы ничего не отправляем на сервер.</div>
+
+    <!-- Dropzone с 100% кликабельной зоной -->
+    <div id="dropzone" class="dropzone">
+      <span class="emoji">📂</span>
+      <div class="hint">Перетащите файл сюда или <strong>нажмите для выбора</strong></div>
+      <!-- File input перекрывает всю зону -->
+      <input type="file" id="fileInput" accept="image/png, image/jpeg, image/webp"
+             style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:10;">
+    </div>
+
+    <!-- Preview -->
+    <div id="previewContainer" class="hidden mt-5 pt-5 border-t" style="border-color:var(--border)">
+      <div class="flex gap-5 flex-wrap items-center">
+        <div class="w-20 h-20 rounded-xl bg-[repeating-conic-gradient(#e5e7eb_0%_25%,#fff_0%_50%)] bg-[length:20px_20px] flex items-center justify-center shadow-sm overflow-hidden">
+          <img id="previewImage" class="max-w-full max-h-full object-contain" alt="Предпросмотр">
+        </div>
+        <div class="text-sm" style="color:var(--text-secondary)">
+          <span id="previewFilename"></span><br>
+          <span id="previewDimensions"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="generateBtn" class="btn btn-primary" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        ✨ Извлечь палитру и тему
+      </button>
+      <button id="clearBtn" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        🗑️ Очистить
+      </button>
+    </div>
+  </div>
+
+  <!-- ════════ RESULTS ════════ -->
+  <div id="resultArea" class="hidden fade-up">
+    
+    <!-- Palette -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon cyan">🎨</span>
+        Ваша палитра
+      </div>
+      <div class="card-desc">Нажмите на цвет, чтобы сделать его <strong>акцентным</strong>. Клик по hex-коду скопирует его.</div>
+      <div id="paletteGrid"></div>
+    </div>
+
+    <!-- Demo Interface -->
+    <div class="card">
+      <div class="card-title">
+        <span class="icon green">✨</span>
+        Готовая тема для вашего сайта
+      </div>
+      <div class="card-desc">Все элементы ниже используют цвета из вашей палитры. Акцентный цвет можно менять кликом выше.</div>
+      
+      <div id="fullDemo" class="space-y-6" style="background:var(--bg);padding:20px;border-radius:var(--radius)">
+        
+        <!-- Navigation -->
+        <nav class="demo-nav" id="demoNav">
+          <div class="brand">
+            <div class="logo-dot" id="navLogo" style="background:var(--primary)"></div>
+            <span style="font-weight:700;color:var(--text)">КолорПро</span>
+          </div>
+          <div class="links">
+            <a href="#" id="navLink1" style="color:var(--primary)">Главная</a>
+            <a href="#" style="color:var(--text-secondary)">Каталог</a>
+            <a href="#" style="color:var(--text-secondary)">О нас</a>
+          </div>
+          <button class="btn btn-primary" id="demoNavBtn" style="background:var(--accent)">Войти</button>
+        </nav>
+
+        <!-- Cards Grid -->
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- Product Card -->
+          <div class="demo-card">
+            <div class="gradient" id="cardGradient" style="background:linear-gradient(135deg,var(--primary),var(--accent))"></div>
+            <div class="content">
+              <div class="title" id="cardTitle" style="color:var(--text)">Дизайн-система</div>
+              <div class="desc">Готовый набор компонентов на основе вашего бренда</div>
+              <div class="flex justify-between items-center">
+                <span class="price" id="cardPrice" style="color:var(--primary)">₽2 490</span>
+                <button class="btn btn-primary" id="cardButton" style="background:var(--primary)">Купить</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Review Card -->
+          <div class="demo-review">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="avatar" id="avatarBadge" style="background:var(--primary)">П</div>
+              <div>
+                <div class="author" style="color:var(--text)">Анна Иванова</div>
+                <div class="role">Подписчик</div>
+              </div>
+            </div>
+            <p class="text" style="color:var(--text-secondary)">"Цвета идеально подошли под наш стиль! Рекомендую."</p>
+            <div class="tags">
+              <span class="tag primary" id="tagPrimary">Акцент</span>
+              <span class="tag" style="background:var(--surface-hover);color:var(--text-secondary)">Отзыв</span>
+            </div>
+            <div class="flex justify-between items-center mt-4 pt-3" style="border-top:1px solid var(--border)">
+              <div class="like" id="likeHeartNew">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                <span id="likeCount">0</span>
+              </div>
+              <span style="font-size:12px;color:var(--text-muted)">Оцените отзыв</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subscribe Form -->
+        <div class="demo-subscribe" id="subscribeBlock">
+          <div class="text">
+            <h4>Будьте в курсе</h4>
+            <p>Подпишитесь на новости о новых цветовых схемах</p>
+          </div>
+          <div class="form">
+            <input type="email" placeholder="Ваш email">
+            <button class="btn" id="subscribeBtn" style="color:var(--primary)">Подписаться</button>
+          </div>
+        </div>
+
+      </div>
+      <p class="text-center text-xs" style="color:var(--text-muted);margin-top:16px">* Все цвета меняются динамически при выборе акцента в палитре</p>
+    </div>
+
+    <!-- Code Panel -->
+    <div class="card">
+      <div class="code-tabs">
+        <div class="code-tab active" id="tabTailwindBtn" onclick="switchCodeTab('tailwind')">🐼 Tailwind config</div>
+        <div class="code-tab" id="tabCssBtn" onclick="switchCodeTab('css')">🎨 CSS variables</div>
+      </div>
+      <div id="codePanel" class="code-block"></div>
+      <button id="copyCodeBtn" class="btn btn-secondary" style="margin-top:16px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        📋 Скопировать код
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ════════ FOOTER ════════ -->
+<footer class="footer">
+  <p>КолорПро — бесплатный генератор цветовых схем. Всё работает локально в вашем браузере, изображения никуда не передаются.</p>
+</footer>
+
+<!-- ════════ TOAST ════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ════════ SCRIPTS ════════ -->
+<!-- 1. Ядро -->
+<script src="../../core/io.js"></script>
+<script src="../../core/ui.js"></script>
+<script src="../../core/storage.js"></script>
+<script src="../../core/theme.js"></script>
+
+<!-- 2. Вендорные библиотеки -->
+<script src="../../assets/libs/color-thief/color-thief.min.js"></script>
+
+<!-- 3. Логика инструмента -->
+<script src="colorExtractor.js"></script>
+<script src="uiManager.js"></script>
+<script src="app.js"></script>
+
+<script>
+// ═══════════════════════════════════════
+//       КОЛОПРО: ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+// ═══════════════════════════════════════
+
+function switchCodeTab(mode) {
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(mode === 'tailwind' ? 'tabTailwindBtn' : 'tabCssBtn').classList.add('active');
+  
+  const panel = document.getElementById('codePanel');
+  if (window.uiManager) {
+    panel.textContent = mode === 'tailwind' 
+      ? window.uiManager.currentTailwindCode 
+      : window.uiManager.currentCssCode;
+  }
+}
+
+// Инициализация лайка в демо
+function initDemoLike() {
+  const likeBtn = document.getElementById('likeHeartNew');
+  const countSpan = document.getElementById('likeCount');
+  let liked = false, count = 0;
+  
+  if (likeBtn) {
+    likeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      liked = !liked;
+      count = liked ? count + 1 : Math.max(0, count - 1);
+      
+      if (liked) {
+        likeBtn.classList.add('liked');
+        likeBtn.querySelector('path').setAttribute('fill', 'currentColor');
+      } else {
+        likeBtn.classList.remove('liked');
+        likeBtn.querySelector('path').setAttribute('fill', 'none');
+      }
+      if (countSpan) countSpan.textContent = count;
+      
+      // Микро-анимация
+      likeBtn.style.transform = 'scale(1.2)';
+      setTimeout(() => { likeBtn.style.transform = ''; }, 200);
+    });
+  }
+}
+
+// Глобальный доступ для app.js
+window.switchCodeTab = switchCodeTab;
+window.initDemoLike = initDemoLike;
+</script>
+</body>
+</html>

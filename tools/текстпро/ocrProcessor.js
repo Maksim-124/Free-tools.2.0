@@ -3,6 +3,7 @@
  * Экспорт: window.OCRExtractor
  * Не зависит от DOM, работает в любом контексте
  */
+console.log('🔍 [DEBUG] ocrProcessor.js ЗАГРУЖЕН');
 (function() {
     'use strict';
 

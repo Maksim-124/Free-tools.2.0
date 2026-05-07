@@ -291,4 +291,5 @@
     
     // Экспорт для отладки
     window.FaviconProApp = { generateFavicons, clearAll, downloadAllAsZip };
+    console.log('🔍 [DEBUG] window.OCRExtractor:', typeof window.OCRExtractor);
 })();

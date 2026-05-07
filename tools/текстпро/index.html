@@ -163,6 +163,136 @@
 
     /* ── Highlight ── */
     mark{background:#fef08a;padding:1px 4px;border-radius:4px;color:var(--text)}
+
+    /* === OCR Module — дизайн как на FaviconПРО === */
+    .ocr-dropzone{
+      border:2px dashed var(--border);
+      border-radius:var(--radius);
+      padding:48px 24px;
+      text-align:center;
+      cursor:pointer;
+      transition:all .3s ease;
+      background:linear-gradient(135deg,var(--surface-hover) 0%,#f8f9fe 100%);
+      position:relative;
+      overflow:hidden;
+      margin-bottom:16px;
+    }
+    .ocr-dropzone::before{
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;bottom:0;
+      background:radial-gradient(circle at center,var(--primary-light) 0%,transparent 70%);
+      opacity:0;
+      transition:opacity .3s ease;
+      pointer-events:none;
+    }
+    .ocr-dropzone:hover::before{opacity:.5}
+    .ocr-dropzone:hover{
+      border-color:var(--primary);
+      transform:translateY(-2px);
+      box-shadow:0 8px 24px rgba(79,70,229,.12);
+    }
+    .ocr-dropzone.dragover{
+      border-color:var(--accent);
+      background:var(--accent-light);
+      transform:scale(1.02);
+    }
+    .dropzone-content{
+      position:relative;
+      z-index:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:16px;
+    }
+    .dropzone-icon{
+      width:80px;height:80px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--primary-light),var(--accent-light));
+      display:flex;align-items:center;justify-content:center;
+      font-size:40px;
+      box-shadow:0 4px 12px rgba(79,70,229,.15);
+      transition:transform .3s ease;
+    }
+    .ocr-dropzone:hover .dropzone-icon{transform:scale(1.1) rotate(5deg)}
+    .dropzone-text{display:flex;flex-direction:column;gap:4px}
+    .dropzone-title{font-size:16px;font-weight:700;color:var(--text);margin:0}
+    .dropzone-hint{font-size:14px;color:var(--text-secondary);margin:0}
+    .dropzone-hint .link{color:var(--primary);font-weight:600;text-decoration:underline;cursor:pointer}
+    .dropzone-formats{font-size:12px;color:var(--text-muted);margin-top:8px}
+    .ocr-preview{
+      max-width:100%;max-height:300px;
+      border-radius:var(--radius-sm);
+      margin:20px auto;
+      display:block;
+      object-fit:contain;
+      border:2px solid var(--border);
+      box-shadow:var(--shadow);
+    }
+    .ocr-loader{
+      text-align:center;
+      padding:32px 24px;
+      background:linear-gradient(135deg,var(--primary-light),var(--success-light));
+      border-radius:var(--radius-sm);
+      margin:20px 0;
+    }
+    .ocr-loader .phase{
+      font-size:14px;font-weight:600;
+      color:var(--text);
+      margin-bottom:16px;
+      min-height:24px;
+    }
+    .ocr-loader progress{
+      width:100%;max-width:400px;
+      height:8px;
+      border-radius:4px;
+      accent-color:var(--primary);
+      -webkit-appearance:none;
+      appearance:none;
+    }
+    .ocr-loader progress::-webkit-progress-bar{
+      background:var(--surface);
+      border-radius:4px;
+    }
+    .ocr-loader progress::-webkit-progress-value{
+      background:linear-gradient(135deg,var(--primary),var(--accent));
+      border-radius:4px;
+      transition:width .3s ease;
+    }
+    .conf-badge{
+      display:inline-flex;align-items:center;
+      padding:4px 12px;
+      border-radius:20px;
+      font-size:12px;font-weight:700;
+    }
+    .conf-high{background:var(--success-light);color:var(--success)}
+    .conf-mid{background:var(--warning-light);color:var(--warning)}
+    .conf-low{background:#fee2e2;color:var(--danger)}
+    .ocr-lang-select{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 16px;
+      border:1.5px solid var(--border);
+      border-radius:var(--radius-sm);
+      background:var(--surface);
+      font-size:14px;color:var(--text);
+      cursor:pointer;
+      transition:all .2s ease;
+    }
+    .ocr-lang-select:hover{border-color:var(--primary)}
+    .ocr-lang-select:focus{
+      border-color:var(--primary);
+      box-shadow:var(--shadow-focus);
+      outline:none;
+    }
+    .ocr-lang-select select{
+      background:transparent;
+      border:none;
+      font-weight:600;
+      color:var(--primary);
+      cursor:pointer;
+      font-size:14px;
+    }
+    #ocr-file{display:none}
   </style>
 </head>
 <body>
@@ -186,6 +316,7 @@
     <div class="tool-tab active" data-tool="cleaner">🧹 Очистка текста</div>
     <div class="tool-tab" data-tool="dedup">📋 Дедупликация</div>
     <div class="tool-tab" data-tool="extractor">🎯 Лид-экстрактор</div>
+    <div class="tool-tab" data-tool="ocr">📷 OCR (Изображения)</div>
   </div>
 
   <!-- ═══════════════════════════════════════════ -->
@@ -301,6 +432,62 @@
     </div>
   </section>
 
+  <!-- ═══════════════════════════════════════════ -->
+  <!--              TOOL 4: OCR                   -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="tool-section" id="tool-ocr">
+    <div class="card">
+      <div class="card-title"><span class="icon amber">📷</span> Распознавание текста</div>
+      <div class="card-desc">Загрузите скриншот, фото документа или скан. Текст извлечётся прямо в браузере.</div>
+      
+      <div id="ocr-dropzone" class="ocr-dropzone">
+        <div class="dropzone-content">
+          <div class="dropzone-icon">📷</div>
+          <div class="dropzone-text">
+            <p class="dropzone-title">Перетащите изображение сюда</p>
+            <p class="dropzone-hint">или <span class="link">нажмите для выбора</span></p>
+            <p class="dropzone-formats">PNG, JPG, WEBP до 15 МБ</p>
+          </div>
+        </div>
+        <input type="file" id="ocr-file" accept="image/png,image/jpeg,image/webp">
+      </div>
+      <img id="ocr-preview" class="ocr-preview" style="display:none" alt="Превью">
+
+      <div class="btn-row" style="margin-top:16px">
+        <label class="ocr-lang-select">
+          🌐 Язык:
+          <select id="ocr-lang">
+            <option value="rus">Русский</option>
+            <option value="eng">English</option>
+            <option value="rus+eng" selected>Русский + English</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" id="ocr-btn" disabled>🔍 Распознать текст</button>
+        <button class="btn btn-secondary" id="ocr-clear" disabled>🗑️ Очистить</button>
+      </div>
+
+      <div id="ocr-loader" class="ocr-loader" style="display:none">
+        <div class="phase" id="ocr-phase">⚙️ Подготовка...</div>
+        <progress id="ocr-progress" value="0" max="100"></progress>
+      </div>
+
+      <div class="result-card" id="ocr-result-card" style="display:none">
+        <div class="result-header">
+          <div class="result-title">📄 Распознанный текст</div>
+          <div class="result-actions">
+            <button class="btn btn-secondary" id="ocr-copy">📋 Копировать</button>
+            <button class="btn btn-secondary" id="ocr-download">💾 Скачать</button>
+          </div>
+        </div>
+        <div class="stats" id="ocr-stats"></div>
+        <div class="result-content" id="ocr-result"></div>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <!-- ════════ FOOTER ════════ -->
@@ -319,8 +506,12 @@
 <script src="../../core/storage.js"></script>
 <script src="../../core/theme.js"></script>
 
+<!-- Tesseract.js v5 -->
+<script src="../../assets/libs/tesseract/tesseract.min.js"></script>
+
 <!-- 2. Логика инструмента -->
 <script src="textProcessor.js"></script>
+<script src="ocrProcessor.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

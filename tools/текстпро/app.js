@@ -9,7 +9,8 @@
     //              STATE
     // ═══════════════════════════════════════
     let dedupSort = 'none';
-    const tools = ['cleaner', 'dedup', 'extractor'];
+    const tools = ['cleaner', 'dedup', 'extractor', 'ocr'];
+    let ocrFile = null;
 
     // ═══════════════════════════════════════
     //              HELPERS
@@ -29,11 +30,19 @@
     function updateCount(tool) {
         const ta = document.getElementById(tool + '-input');
         const counter = document.getElementById(tool + '-count');
-        if (!ta || !counter) return;
+        if (!ta && tool !== 'ocr') return;
+        if (!counter) return;
         
         if (tool === 'dedup') {
             const lines = window.TextProcessor.countLines(ta.value);
             counter.textContent = lines + ' строк';
+        } else if (tool === 'ocr') {
+            if (ocrFile) {
+                const mb = (ocrFile.size / 1024 / 1024).toFixed(2);
+                counter.textContent = `${mb} МБ • ${ocrFile.type.split('/')[1].toUpperCase()}`;
+            } else {
+                counter.textContent = 'Нет файла';
+            }
         } else {
             counter.textContent = window.TextProcessor.countSymbols(ta.value) + ' символов';
         }
@@ -49,11 +58,21 @@
     }
 
     function clearField(tool) {
-        const input = document.getElementById(tool + '-input');
-        if (input) input.value = '';
+        if (tool === 'ocr') {
+            ocrFile = null;
+            const preview = document.getElementById('ocr-preview');
+            if (preview) preview.style.display = 'none';
+            const btn = document.getElementById('ocr-btn');
+            const clearBtn = document.getElementById('ocr-clear');
+            if (btn) btn.disabled = true;
+            if (clearBtn) clearBtn.disabled = true;
+            const resultCard = document.getElementById('ocr-result-card');
+            if (resultCard) resultCard.style.display = 'none';
+        } else {
+            const input = document.getElementById(tool + '-input');
+            if (input) input.value = '';
+        }
         updateCount(tool);
-        const resultCard = document.getElementById(tool + '-result-card');
-        if (resultCard) resultCard.style.display = 'none';
         showToast('🗑️ Очищено');
     }
 
@@ -202,6 +221,68 @@
     }
 
     // ═══════════════════════════════════════
+    //           TOOL 4: OCR
+    // ═══════════════════════════════════════
+    async function processOCR() {
+        if (!ocrFile) { showToast('⚠️ Сначала загрузите изображение'); return; }
+        
+        const btn = document.getElementById('ocr-btn');
+        const loader = document.getElementById('ocr-loader');
+        const phaseEl = document.getElementById('ocr-phase');
+        const progressEl = document.getElementById('ocr-progress');
+        const resultCard = document.getElementById('ocr-result-card');
+        const resultEl = document.getElementById('ocr-result');
+        const statsEl = document.getElementById('ocr-stats');
+
+        btn.disabled = true;
+        loader.style.display = 'block';
+        resultCard.style.display = 'none';
+        phaseEl.textContent = '⚙️ Загрузка движка OCR...';
+        progressEl.value = 0;
+
+        const lang = document.getElementById('ocr-lang').value;
+        window.Core.Storage.set('ocr_lang', lang);
+
+        try {
+            await window.OCRExtractor.init(lang.split('+'), (m) => {
+                if (m.status === 'loading tesseract core' || m.status === 'initializing api') {
+                    phaseEl.textContent = '📥 Инициализация ядра...';
+                    progressEl.value = Math.round(m.progress * 50);
+                } else if (m.status === 'recognizing text') {
+                    phaseEl.textContent = '🔍 Распознавание текста...';
+                    progressEl.value = 50 + Math.round(m.progress * 50);
+                }
+            });
+
+            phaseEl.textContent = '⏳ Обработка изображения...';
+            const { text, confidence, timeMs } = await window.OCRExtractor.recognize(ocrFile);
+
+            progressEl.value = 100;
+            phaseEl.textContent = '✅ Готово';
+
+            if (!text) throw new Error('Текст не найден');
+
+            resultEl.textContent = text;
+            const badgeClass = confidence >= 80 ? 'conf-high' : confidence >= 60 ? 'conf-mid' : 'conf-low';
+            const lines = text.split('\n').filter(l => l.trim()).length;
+            statsEl.innerHTML = `
+                <span class="stat blue">Время: ${timeMs} мс</span>
+                <span class="stat green">Строк: ${lines}</span>
+                <span class="stat amber">Точность: <span class="conf-badge ${badgeClass}">${confidence}%</span></span>
+            `;
+            resultCard.style.display = 'block';
+            window.Core.UI.scrollTo(resultCard, 20);
+            showToast(`✅ Распознано ${lines} строк`);
+        } catch (e) {
+            console.error('OCR Error:', e);
+            showToast('❌ Ошибка: ' + e.message);
+        } finally {
+            loader.style.display = 'none';
+            btn.disabled = false;
+        }
+    }
+
+    // ═══════════════════════════════════════
     //              INIT
     // ═══════════════════════════════════════
     document.addEventListener('DOMContentLoaded', () => {
@@ -272,6 +353,63 @@
             }
         });
 
+        // ═══════════════════════════════════════
+        // OCR: Dropzone + File Input
+        // ═══════════════════════════════════════
+        const ocrDropzone = document.getElementById('ocr-dropzone');
+        const ocrFileInput = document.getElementById('ocr-file');
+        
+        if (ocrDropzone && ocrFileInput) {
+            ocrDropzone.addEventListener('click', () => ocrFileInput.click());
+            
+            // Обработчик выбора файла
+            ocrFileInput.addEventListener('change', (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                
+                const res = window.Core.IO?.validateFile?.(file, 15, ['image/png', 'image/jpeg', 'image/webp']) || { ok: true };
+                if (!res.ok) return showToast(res.error);
+                
+                ocrFile = file;
+                updateCount('ocr');
+                
+                const preview = document.getElementById('ocr-preview');
+                if (preview) {
+                    if (window.Core.IO?.previewImage) {
+                        window.Core.IO.previewImage(file, preview, () => {});
+                    } else {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => { preview.src = ev.target.result; };
+                        reader.readAsDataURL(file);
+                    }
+                    preview.style.display = 'block';
+                }
+                const btn = document.getElementById('ocr-btn');
+                const clearBtn = document.getElementById('ocr-clear');
+                if (btn) btn.disabled = false;
+                if (clearBtn) clearBtn.disabled = false;
+            });
+        }
+
+        // OCR: кнопки
+        document.getElementById('ocr-btn')?.addEventListener('click', processOCR);
+        document.getElementById('ocr-clear')?.addEventListener('click', () => clearField('ocr'));
+        
+        // OCR: копирование/скачивание
+        document.getElementById('ocr-copy')?.addEventListener('click', () => {
+            const text = document.getElementById('ocr-result')?.textContent || '';
+            if (text) copyText(text);
+        });
+        document.getElementById('ocr-download')?.addEventListener('click', () => {
+            const text = document.getElementById('ocr-result')?.textContent || '';
+            if (text) downloadText(text, 'ocr-text.txt');
+        });
+
+        // Загрузка сохранённого языка
+        const savedLang = window.Core.Storage.get('ocr_lang', 'rus+eng');
+        const langSelect = document.getElementById('ocr-lang');
+        if (langSelect) langSelect.value = savedLang;
+
         // Сортировка в дедупликаторе
         document.querySelectorAll('#tool-dedup .sort-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -281,9 +419,9 @@
             });
         });
 
-        console.log('✅ ТекстПро 2.0 успешно инициализирован');
+        console.log('✅ ТекстПро 2.0 успешно инициализирован + OCR модуль');
     });
 
     // Экспорт для отладки
-    window.TextProApp = { switchTool, processCleaner, processDedup, processExtractor };
+    window.TextProApp = { switchTool, processCleaner, processDedup, processExtractor, processOCR };
 })();

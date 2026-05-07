@@ -37,7 +37,7 @@
                     // Пути к локальным ассетам (относительно index.html инструмента)
                     workerPath: '../../assets/libs/tesseract/tesseract.min.js',
                     langPath: '../../assets/libs/tesseract/lang',
-                    corePath: '../../assets/libs/tesseract/tesseract-core.wasm.js',
+                    corePath: '../../assets/libs/tesseract/',
                     // Файлы .traineddata сжаты в .gz — Tesseract.js распакует сам
                     gzip: true,
                     // Не кэшировать через Service Worker (проблемы с file://)

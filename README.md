@@ -26,13 +26,24 @@
 │ │ ├── uiManager.js # Управление интерфейсом (экспорт: window.UIManager)
 │ │ └── README.md # Документация инструмента
 │ ├── текстпро/
+│ │ ├── index.html
+│ │ ├── app.js
+│ │ ├── textProcessor.js
+│ │ ├── ocrProcessor.js
+│ │ └── README.md
 │ └── faviconпро/
 ├── assets/ # Статика: библиотеки, иконки, стили
 │ ├── libs/
 │ │ ├── color-thief/
 │ │ │ └── color-thief.min.js
-│ │ └── jszip/
-│ │ └── jszip.min.js
+│ │ ├── jszip/
+│ │ │ └── jszip.min.js
+│ │ └── tesseract/
+│ │   ├── tesseract.min.js
+│ │   ├── worker.min.js
+│ │   └── lang/          # LSTM-совместимые traineddata
+│ │       ├── rus.traineddata
+│ │       └── eng.traineddata
 │ └── favicon/
 │ ├── favicon.ico
 │ ├── apple-touch-icon.png

@@ -36,12 +36,8 @@ console.log('🔍 [DEBUG] ocrProcessor.js ЗАГРУЖЕН');
                         }
                     },
                     // Пути к локальным ассетам (относительно index.html инструмента)
-                    workerPath: '../../assets/libs/tesseract/tesseract.min.js',
                     langPath: '../../assets/libs/tesseract/lang',
-                    corePath: '../../assets/libs/tesseract/',
-                    // Файлы .traineddata сжаты в .gz — Tesseract.js распакует сам
-                    gzip: false,
-                    // Не кэшировать через Service Worker (проблемы с file://)
+                    cachePath: '../../assets/libs/tesseract',
                     cacheMethod: 'none'
                 });
 

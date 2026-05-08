@@ -28,7 +28,7 @@ console.log('🔍 [DEBUG] ocrProcessor.js ЗАГРУЖЕН');
             }
 
             try {
-                this._worker = await Tesseract.createWorker(langs.join('+'), 1, {
+                this._worker = await Tesseract.createWorker(langs.join('+'), 2, {
                     logger: (m) => {
                         // Отдаём UI только значимые этапы
                         if (['loading tesseract core', 'initializing api', 'recognizing text'].includes(m.status)) {

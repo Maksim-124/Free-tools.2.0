@@ -30,16 +30,14 @@ console.log('🔍 [DEBUG] ocrProcessor.js ЗАГРУЖЕН');
             try {
                 this._worker = await Tesseract.createWorker(langs.join('+'), 2, {
                     logger: (m) => {
-                        // Отдаём UI только значимые этапы
                         if (['loading tesseract core', 'initializing api', 'recognizing text'].includes(m.status)) {
                             onProgress?.(m);
                         }
                     },
-                    // Пути к локальным ассетам (относительно index.html инструмента)
                     langPath: '../../assets/libs/tesseract/lang',
-                    cachePath: '../../assets/libs/tesseract',
+                    corePath: '../../assets/libs/tesseract',
                     cacheMethod: 'none'
-                });
+            });
 
                 this._currentLang = langKey;
                 this._isReady = true;

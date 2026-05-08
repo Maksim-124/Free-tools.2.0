@@ -35,7 +35,6 @@ console.log('🔍 [DEBUG] ocrProcessor.js ЗАГРУЖЕН');
                         }
                     },
                     langPath: '../../assets/libs/tesseract/lang',
-                    corePath: '../../assets/libs/tesseract',
                     cacheMethod: 'none'
             });
 

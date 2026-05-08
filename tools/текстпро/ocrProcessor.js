@@ -40,7 +40,7 @@ console.log('🔍 [DEBUG] ocrProcessor.js ЗАГРУЖЕН');
                     langPath: '../../assets/libs/tesseract/lang',
                     corePath: '../../assets/libs/tesseract/',
                     // Файлы .traineddata сжаты в .gz — Tesseract.js распакует сам
-                    gzip: true,
+                    gzip: false,
                     // Не кэшировать через Service Worker (проблемы с file://)
                     cacheMethod: 'none'
                 });

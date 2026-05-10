@@ -685,14 +685,47 @@
         .dark ::-webkit-scrollbar-thumb {
             background: #475569;
         }
+
+        /* Градиентный текст free-tools */
+        .gradient-text {
+            background-image: linear-gradient(to right, #f97316, #ec4899, #9333ea);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            user-select: none;
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.05));
+            line-height: 1.2;
+        }
+        .dark .gradient-text {
+            background-image: linear-gradient(to right, #fb923c, #f472b6, #a855f7);
+        }
+
+        /* Мобильный брендинг */
+        .mobile-brand-text {
+            font-size: 1rem;
+            margin-left: 0.25rem;
+            white-space: nowrap;
+        }
+
+        /* Убираем старое правило display:none для десктопа, чтобы градиент работал */
+        .sidebar-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: -0.025em;
+            white-space: nowrap;
+            display: inline; /* или block, на ваше усмотрение, но inline подойдёт */
+        }
     </style>
 </head>
 <body class="" id="bodyEl">
     <!-- Mobile Header -->
     <header class="mobile-header" id="mobileHeader">
         <div class="mobile-header-left">
-            <a href="#" class="mobile-header-logo" id="mobileHomeLink" aria-label="На главную">
-                <img src="assets/mascot.webp" alt="free-tools.ru">
+            <a href="#" class="mobile-header-logo" id="mobileHomeLink" aria-label="На главную" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: inherit;">
+                <img src="assets/mascot.webp" alt="free-tools.ru" style="width: 2.2rem; height: 2.2rem; border-radius: 0.5rem;">
+                <span class="mobile-brand-text gradient-text">free-tools</span>
             </a>
         </div>
         <div class="mobile-header-actions">
@@ -721,7 +754,7 @@
             <div class="sidebar-logo">
                 <img src="assets/mascot.webp" alt="Маскот free-tools.ru">
             </div>
-            <span class="sidebar-title">free-tools.ru</span>
+            <span class="sidebar-title gradient-text">free-tools</span>
         </a>
 
         <nav class="sidebar-nav">

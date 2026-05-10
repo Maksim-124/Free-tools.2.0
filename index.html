@@ -42,6 +42,7 @@
             --transition: 200ms ease;
             --sidebar-width: 5rem;
             --sidebar-md-width: 16rem;
+            --mobile-header-height: 3.5rem;
         }
 
         .dark {
@@ -64,6 +65,60 @@
             transition: background-color 0.3s, color 0.3s;
             display: flex;
             min-height: 100vh;
+            padding-top: 0; /* для мобильного хедера */
+        }
+
+        /* ===== Mobile Header ===== */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--mobile-header-height);
+            background-color: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            z-index: 30;
+            padding: 0 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-header-logo {
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .mobile-header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .mobile-header-btn {
+            background: none;
+            border: none;
+            color: var(--color-text);
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .mobile-header-btn:hover {
+            background-color: var(--color-hover);
+        }
+
+        .mobile-header-btn svg {
+            width: 1.5rem;
+            height: 1.5rem;
         }
 
         /* ===== Sidebar ===== */
@@ -78,13 +133,38 @@
             bottom: 0;
             left: 0;
             z-index: 20;
-            transition: width 0.3s;
+            transition: transform 0.3s ease, width 0.3s;
         }
 
         @media (min-width: 768px) {
             .sidebar {
                 width: var(--sidebar-md-width);
                 position: sticky;
+            }
+        }
+
+        /* На мобильных сайдбар скрыт за экраном */
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 16rem; /* фиксированная ширина на мобильных */
+                transform: translateX(-100%);
+                z-index: 40;
+                padding-top: var(--mobile-header-height); /* чтобы не перекрывался хедером */
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            /* Overlay */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.4);
+                z-index: 35;
+            }
+            .sidebar-overlay.active {
+                display: block;
             }
         }
 
@@ -290,6 +370,15 @@
             }
         }
 
+        /* На мобильных убираем отступ слева, так как сайдбар фиксированный */
+        @media (max-width: 767px) {
+            .main {
+                margin-left: 0;
+                padding-top: calc(var(--mobile-header-height) + 1rem);
+                padding: 1rem;
+            }
+        }
+
         /* ===== Home Content (Dashboard) ===== */
         .home-content {
             display: block;
@@ -317,6 +406,39 @@
             border-radius: var(--radius-lg);
             background: var(--color-surface);
             box-shadow: var(--shadow-sm);
+        }
+
+        /* Плавающая кнопка возврата на главную (мобильные) */
+        .floating-home-btn {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 50;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--color-text);
+            transition: background-color 0.2s;
+        }
+        .floating-home-btn:hover {
+            background-color: var(--color-hover);
+        }
+        .floating-home-btn svg {
+            width: 1.3rem;
+            height: 1.3rem;
+        }
+
+        @media (max-width: 767px) {
+            .floating-home-btn.visible {
+                display: flex;
+            }
         }
 
         /* ===== Header (inside home-content) ===== */
@@ -435,7 +557,7 @@
             transform: translateY(-0.25rem);
         }
 
-        /* Основная невидимая ссылка-перекрытие (теперь используем JS, поэтому ссылка пустая) */
+        /* Основная невидимая ссылка-перекрытие */
         .tool-card-main-link {
             position: absolute;
             top: 0;
@@ -448,7 +570,7 @@
             outline: none;
         }
 
-        /* Контент карточки (поднят над основной ссылкой) */
+        /* Контент карточки */
         .tool-card-body {
             position: relative;
             z-index: 2;
@@ -564,8 +686,25 @@
     </style>
 </head>
 <body>
+    <!-- Mobile Header -->
+    <header class="mobile-header" id="mobileHeader">
+        <a href="#" class="mobile-header-logo" id="mobileHomeLink" aria-label="На главную">
+            <img src="assets/mascot.webp" alt="free-tools.ru">
+        </a>
+        <button class="mobile-header-btn" id="mobileMenuBtn" aria-label="Меню">
+            <!-- Иконка "сайдбар" (прямоугольник с линией) -->
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                <path d="M12 3v18" stroke-linecap="round"/>
+            </svg>
+        </button>
+    </header>
+
+    <!-- Overlay для мобильного сайдбара -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <a href="#" class="sidebar-brand" id="homeLink" aria-label="free-tools.ru — Главная">
             <div class="sidebar-logo">
                 <img src="assets/mascot.webp" alt="Маскот free-tools.ru">
@@ -574,7 +713,6 @@
         </a>
 
         <nav class="sidebar-nav">
-            <!-- Меню Инструменты -->
             <button class="sidebar-menu-btn active" id="toolsMenuBtn" aria-expanded="true">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
@@ -621,7 +759,14 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="main">
+    <main class="main" id="mainContent">
+        <!-- Плавающая кнопка возврата на главную (видна на мобильных при открытом инструменте) -->
+        <button class="floating-home-btn" id="floatingHomeBtn" aria-label="На главную">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+        </button>
+
         <!-- Home Dashboard -->
         <div id="homeContent" class="home-content">
             <header class="header">
@@ -720,7 +865,7 @@
 
     <script>
         (function() {
-            // ═══════════════ Theme ═══════════════
+            // ═══════ Theme ═══════
             window.Core.Theme.init();
             const themeToggle = document.getElementById('themeToggle');
             themeToggle.addEventListener('click', () => {
@@ -738,44 +883,72 @@
                 if (labelEl) labelEl.textContent = theme === 'dark' ? 'Тёмная' : 'Светлая';
             }
 
-            // ═══════════════ Submenu toggle ═══════════════
+            // ═══════ Submenu toggle ═══════
             const menuBtn = document.getElementById('toolsMenuBtn');
             const submenu = document.getElementById('toolsSubmenu');
             const arrow = menuBtn.querySelector('.sidebar-menu-arrow');
-
             menuBtn.addEventListener('click', () => {
                 const isOpen = submenu.classList.toggle('open');
                 arrow.classList.toggle('open', isOpen);
                 menuBtn.setAttribute('aria-expanded', isOpen);
             });
 
-            // ═══════════════ Navigation & Tool Loading ═══════════════
+            // ═══════ Mobile sidebar ═══════
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+            }
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+            mobileMenuBtn.addEventListener('click', openSidebar);
+            overlay.addEventListener('click', closeSidebar);
+            // Закрытие по свайпу влево не реализуем, но можно добавить при желании
+
+            // ═══════ Navigation & Tool Loading ═══════
             const homeContent = document.getElementById('homeContent');
             const toolFrameContainer = document.getElementById('toolFrameContainer');
             const toolFrame = document.getElementById('toolFrame');
             const homeLink = document.getElementById('homeLink');
+            const mobileHomeLink = document.getElementById('mobileHomeLink');
+            const floatingHomeBtn = document.getElementById('floatingHomeBtn');
 
-            // Открыть инструмент в iframe
             function openTool(url) {
                 if (!url) return;
                 homeContent.classList.add('hidden');
                 toolFrameContainer.classList.add('active');
                 toolFrame.src = url;
+                // На мобильных показываем кнопку возврата
+                if (window.innerWidth < 768) {
+                    floatingHomeBtn.classList.add('visible');
+                }
             }
 
-            // Вернуться на главную панель
             function showHome() {
                 homeContent.classList.remove('hidden');
                 toolFrameContainer.classList.remove('active');
-                // Очищаем src для остановки выполнения скриптов внутри iframe
                 toolFrame.src = '';
+                floatingHomeBtn.classList.remove('visible');
             }
 
-            // Клик по логотипу — всегда домой
             homeLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 showHome();
+                closeSidebar();
             });
+
+            mobileHomeLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showHome();
+                closeSidebar();
+            });
+
+            floatingHomeBtn.addEventListener('click', showHome);
 
             // Подменю: ссылки с data-tool
             document.querySelectorAll('.sidebar-submenu a[data-tool]').forEach(link => {
@@ -783,6 +956,7 @@
                     e.preventDefault();
                     const toolUrl = link.getAttribute('data-tool');
                     openTool(toolUrl);
+                    closeSidebar();
                 });
             });
 
@@ -795,6 +969,11 @@
                     openTool(toolUrl);
                 });
             });
+
+            // При загрузке страницы на мобильных убедимся, что кнопка скрыта
+            if (window.innerWidth >= 768) {
+                floatingHomeBtn.classList.remove('visible');
+            }
         })();
     </script>
 </body>

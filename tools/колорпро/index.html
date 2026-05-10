@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>КолорПро — генератор цветовой схемы и готовой темы из изображения</title>
   
-  <!-- Tailwind CSS: dev-режим (CDN). Для прода замените на <link rel="stylesheet" href="../../assets/css/tailwind.min.css"> -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Единые стили free-Tools 2.0 -->
+  <!-- Единые стили free-tools.ru -->
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -50,7 +47,7 @@
       -webkit-font-smoothing:antialiased;
     }
 
-    /* ── Header (единый стиль free-Tools 2.0) ── */
+    /* ── Header ── */
     .header{
       background:linear-gradient(135deg,var(--primary) 0%,#7c3aed 50%,var(--accent) 100%);
       padding:48px 24px 56px;
@@ -143,8 +140,47 @@
     .btn-secondary:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
     .btn svg{width:18px;height:18px}
 
+    /* ── Утилиты, заменяющие Tailwind ── */
+    .hidden{display:none!important}
+    .flex{display:flex}
+    .flex-wrap{flex-wrap:wrap}
+    .items-center{align-items:center}
+    .justify-between{justify-content:space-between}
+    .gap-5{gap:20px}
+    .mt-5{margin-top:20px}
+    .pt-5{padding-top:20px}
+    .border-t{border-top:1px solid var(--border)}
+    .text-sm{font-size:14px}
+    .text-xs{font-size:12px}
+    .text-center{text-align:center}
+    .text-secondary{color:var(--text-secondary)}
+    .w-20{width:80px}
+    .h-20{height:80px}
+    .rounded-xl{border-radius:12px}
+    .shadow-sm{box-shadow:0 1px 2px rgba(0,0,0,0.05)}
+    .overflow-hidden{overflow:hidden}
+    .max-w-full{max-width:100%}
+    .max-h-full{max-height:100%}
+    .object-contain{object-fit:contain}
+
+    /* Фоновый шахматный паттерн для превью */
+    .checkerboard-bg{
+      background:repeating-conic-gradient(#e5e7eb 0% 25%, #ffffff 0% 50%);
+      background-size:20px 20px;
+    }
+
+    /* Сетки */
+    .grid{display:grid}
+    .gap-6{gap:24px}
+    @media(min-width:768px){
+      .md-grid-cols-2{grid-template-columns:repeat(2,1fr)}
+    }
+    .space-y-6 > * + *{margin-top:24px}
+
     /* ── Palette Grid ── */
-    #paletteGrid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+    #paletteGrid{
+      display:flex;flex-wrap:wrap;gap:16px;justify-content:center;
+    }
     .color-card{
       flex:1;min-width:100px;max-width:140px;
       background:var(--surface);border:1px solid var(--border);
@@ -152,7 +188,11 @@
       cursor:pointer;transition:all .2s ease;
     }
     .color-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-    .color-card.active-accent{outline:3px solid var(--primary);outline-offset:2px;transform:scale(1.02)}
+    .color-card.active-accent{
+      outline:3px solid var(--primary);
+      outline-offset:2px;
+      transform:scale(1.02);
+    }
     .color-card .swatch{height:80px;width:100%}
     .color-card .hex{
       padding:12px;text-align:center;font-family:var(--mono);
@@ -309,12 +349,12 @@
     </div>
 
     <!-- Preview -->
-    <div id="previewContainer" class="hidden mt-5 pt-5 border-t" style="border-color:var(--border)">
+    <div id="previewContainer" class="hidden mt-5 pt-5 border-t">
       <div class="flex gap-5 flex-wrap items-center">
-        <div class="w-20 h-20 rounded-xl bg-[repeating-conic-gradient(#e5e7eb_0%_25%,#fff_0%_50%)] bg-[length:20px_20px] flex items-center justify-center shadow-sm overflow-hidden">
+        <div class="w-20 h-20 rounded-xl checkerboard-bg flex items-center justify-center shadow-sm overflow-hidden">
           <img id="previewImage" class="max-w-full max-h-full object-contain" alt="Предпросмотр">
         </div>
-        <div class="text-sm" style="color:var(--text-secondary)">
+        <div class="text-sm text-secondary">
           <span id="previewFilename"></span><br>
           <span id="previewDimensions"></span>
         </div>
@@ -371,7 +411,7 @@
         </nav>
 
         <!-- Cards Grid -->
-        <div class="grid md:grid-cols-2 gap-6">
+        <div class="grid gap-6 md-grid-cols-2">
           <!-- Product Card -->
           <div class="demo-card">
             <div class="gradient" id="cardGradient" style="background:linear-gradient(135deg,var(--primary),var(--accent))"></div>
@@ -387,7 +427,7 @@
           
           <!-- Review Card -->
           <div class="demo-review">
-            <div class="flex items-center gap-3 mb-3">
+            <div class="flex items-center gap-5 mb-3" style="margin-bottom:12px">
               <div class="avatar" id="avatarBadge" style="background:var(--primary)">П</div>
               <div>
                 <div class="author" style="color:var(--text)">Анна Иванова</div>
@@ -399,7 +439,7 @@
               <span class="tag primary" id="tagPrimary">Акцент</span>
               <span class="tag" style="background:var(--surface-hover);color:var(--text-secondary)">Отзыв</span>
             </div>
-            <div class="flex justify-between items-center mt-4 pt-3" style="border-top:1px solid var(--border)">
+            <div class="flex justify-between items-center mt-4 pt-3" style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
               <div class="like" id="likeHeartNew">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                 <span id="likeCount">0</span>
@@ -428,8 +468,8 @@
     <!-- Code Panel -->
     <div class="card">
       <div class="code-tabs">
-        <div class="code-tab active" id="tabTailwindBtn" onclick="switchCodeTab('tailwind')">🐼 Tailwind config</div>
-        <div class="code-tab" id="tabCssBtn" onclick="switchCodeTab('css')">🎨 CSS variables</div>
+        <div class="code-tab active" id="tabTailwindBtn">🐼 Tailwind config</div>
+        <div class="code-tab" id="tabCssBtn">🎨 CSS variables</div>
       </div>
       <div id="codePanel" class="code-block"></div>
       <button id="copyCodeBtn" class="btn btn-secondary" style="margin-top:16px">

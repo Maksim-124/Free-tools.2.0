@@ -1,12 +1,11 @@
 /**
  * uiManager.js — управление интерфейсом КолорПРО
  * Экспортирует: window.UIManager (класс)
- * Версия: 2.0.1 — исправлен экспорт для file://
+ * Версия: 2.0.2 — переписано без Tailwind
  */
 (function() {
     'use strict';
     
-    // Гарантированный экспорт в глобальную область
     window.UIManager = class UIManager {
         constructor() {
             // Кэшируем элементы
@@ -170,16 +169,17 @@
 
         switchCodeTab(mode) {
             this.currentCodeMode = mode;
-            if (mode === 'tailwind') {
-                if (this.codePanel) this.codePanel.textContent = this.currentTailwindCode;
-                if (window.Core?.UI?.setActiveTab && this.tabTailwindBtn) {
-                    window.Core.UI.setActiveTab(this.tabTailwindBtn, '.tab-btn');
-                }
-            } else {
-                if (this.codePanel) this.codePanel.textContent = this.currentCssCode;
-                if (window.Core?.UI?.setActiveTab && this.tabCssBtn) {
-                    window.Core.UI.setActiveTab(this.tabCssBtn, '.tab-btn');
-                }
+            document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+            const activeTab = mode === 'tailwind' ? this.tabTailwindBtn : this.tabCssBtn;
+            if (activeTab) activeTab.classList.add('active');
+            if (this.codePanel) {
+                this.codePanel.textContent = mode === 'tailwind' 
+                    ? this.currentTailwindCode 
+                    : this.currentCssCode;
+            }
+            // Используем Core.UI.setActiveTab, если доступен
+            if (window.Core?.UI?.setActiveTab && activeTab) {
+                window.Core.UI.setActiveTab(activeTab, '.tab-btn');
             }
         }
 
@@ -189,29 +189,32 @@
             
             hexArray.forEach(hex => {
                 const card = document.createElement('div');
-                card.className = `flex-1 min-w-[100px] bg-white border border-gray-200 rounded-xl overflow-hidden cursor-pointer transition hover:-translate-y-1 hover:shadow-md ${hex === activeAccentHex ? 'active-accent' : ''}`;
+                card.className = 'color-card';
+                if (hex === activeAccentHex) {
+                    card.classList.add('active-accent');
+                }
                 card.innerHTML = `
-                    <div class="h-20 w-full" style="background-color: ${hex};"></div>
-                    <div class="p-3 text-center font-mono text-sm font-semibold">
-                        <div class="text-gray-800">${hex}</div>
-                        <div class="text-xs text-gray-400 mt-1">копировать</div>
+                    <div class="swatch" style="background-color: ${hex};"></div>
+                    <div class="hex">
+                        <div>${hex}</div>
+                        <small>копировать</small>
                     </div>
                 `;
                 
-                const colorDiv = card.querySelector('.h-20');
-                const hexSpan = card.querySelector('.text-gray-800');
+                const swatch = card.querySelector('.swatch');
+                const hexDiv = card.querySelector('.hex div');
                 
                 // Клик по цвету → смена акцента
-                if (colorDiv && typeof onAccentChange === 'function') {
-                    colorDiv.addEventListener('click', (e) => {
+                if (swatch && typeof onAccentChange === 'function') {
+                    swatch.addEventListener('click', (e) => {
                         e.stopPropagation();
                         onAccentChange(hex, card);
                     });
                 }
                 
                 // Клик по hex → копирование
-                if (hexSpan && typeof onCopyHex === 'function') {
-                    hexSpan.addEventListener('click', (e) => {
+                if (hexDiv && typeof onCopyHex === 'function') {
+                    hexDiv.addEventListener('click', (e) => {
                         e.stopPropagation();
                         onCopyHex(hex).then(res => {
                             if (!res.ok) console.warn('Copy failed:', res.error);
@@ -241,6 +244,5 @@
         }
     };
     
-    // Лог для отладки: подтверждаем, что класс экспортирован
     console.log('✅ UIManager загружен и экспортирован в window.UIManager');
 })();

@@ -65,21 +65,29 @@
             transition: background-color 0.3s, color 0.3s;
             display: flex;
             min-height: 100vh;
-            padding-top: 0; /* будет задаваться для мобильных */
+            padding-top: 0;
         }
 
         /* ===== Mobile Header ===== */
         .mobile-header {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            align-items: center;
-            justify-content: initial; 
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--mobile-header-height);
+            background-color: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            z-index: 30;
             padding: 0 1rem;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .mobile-header-left {
-            justify-self: center;
-            gap: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .mobile-header-logo {
@@ -102,7 +110,9 @@
         }
 
         .mobile-header-actions {
-            gap: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .mobile-header-btn {
@@ -128,12 +138,10 @@
             height: 1.5rem;
         }
 
-        /* Кнопка "Домой" по умолчанию скрыта */
         .mobile-home-btn {
             display: none;
         }
 
-        /* Показываем, когда активен инструмент */
         .tool-open .mobile-home-btn {
             display: flex;
         }
@@ -160,7 +168,6 @@
             }
         }
 
-        /* На мобильных сайдбар скрыт за экраном */
         @media (max-width: 767px) {
             .sidebar {
                 width: 16rem;
@@ -172,7 +179,6 @@
                 transform: translateX(0);
             }
 
-            /* Overlay */
             .sidebar-overlay {
                 display: none;
                 position: fixed;
@@ -184,17 +190,24 @@
                 display: block;
             }
 
-            /* Мобильный хедер показываем */
             .mobile-header {
                 display: flex;
+                justify-content: space-between;
             }
 
-            /* Контент начинается ниже хедера */
+            .mobile-header-left {
+                position: static;
+                transform: none;
+            }
+
+            .mobile-header-actions {
+                margin-left: 0;
+            }
+
             body {
                 padding-top: var(--mobile-header-height);
             }
 
-            /* Показываем подписи на мобильных, так как места достаточно */
             .sidebar-menu-text {
                 display: inline;
             }
@@ -203,6 +216,11 @@
             }
             .theme-label {
                 display: inline;
+            }
+
+            /* Фикс — логотип не уходит за экран */
+            .mobile-header-logo {
+                width: auto;
             }
         }
 
@@ -247,7 +265,7 @@
 
         @media (min-width: 768px) {
             .sidebar-title {
-                display: block;
+                display: inline;
             }
         }
 
@@ -257,7 +275,6 @@
             overflow-y: auto;
         }
 
-        /* Кнопка-заголовок подменю */
         .sidebar-menu-btn {
             display: flex;
             align-items: center;
@@ -291,6 +308,10 @@
             flex-shrink: 0;
         }
 
+        .sidebar-menu-text {
+            display: none;
+        }
+
         @media (min-width: 768px) {
             .sidebar-menu-text {
                 display: inline;
@@ -305,7 +326,6 @@
             transform: rotate(180deg);
         }
 
-        /* Подменю */
         .sidebar-submenu {
             list-style: none;
             max-height: 0;
@@ -339,6 +359,10 @@
             width: 1.25rem;
             height: 1.25rem;
             flex-shrink: 0;
+        }
+
+        .sidebar-submenu a span {
+            display: none;
         }
 
         @media (min-width: 768px) {
@@ -379,7 +403,9 @@
 
         .theme-label {
             font-weight: 500;
+            display: none;
         }
+
         @media (min-width: 768px) {
             .theme-label {
                 display: inline;
@@ -408,7 +434,6 @@
             }
         }
 
-        /* ===== Home Content (Dashboard) ===== */
         .home-content {
             display: block;
         }
@@ -417,11 +442,10 @@
             display: none;
         }
 
-        /* ===== Tool Frame ===== */
         .tool-frame-container {
             display: none;
             width: 100%;
-            height: calc(100vh - var(--mobile-header-height) - 2rem); /* вычитаем хедер и отступы */
+            height: calc(100vh - var(--mobile-header-height) - 2rem);
         }
 
         .tool-frame-container.active {
@@ -437,7 +461,6 @@
             box-shadow: var(--shadow-sm);
         }
 
-        /* ===== Header (inside home-content) ===== */
         .header {
             margin-bottom: 2.5rem;
             animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -517,7 +540,6 @@
             }
         }
 
-        /* ===== Tools Grid ===== */
         .tools-grid {
             display: grid;
             grid-template-columns: repeat(1, 1fr);
@@ -699,13 +721,18 @@
             white-space: nowrap;
         }
 
-        /* Убираем старое правило display:none для десктопа, чтобы градиент работал */
         .sidebar-title {
             font-weight: 700;
             font-size: 1.25rem;
             letter-spacing: -0.025em;
             white-space: nowrap;
-            display: inline; /* или block, на ваше усмотрение, но inline подойдёт */
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .sidebar-title {
+                display: inline;
+            }
         }
     </style>
 </head>
@@ -719,13 +746,11 @@
             </a>
         </div>
         <div class="mobile-header-actions">
-            <!-- Кнопка "Домой" (появляется при открытом инструменте) -->
             <button class="mobile-header-btn mobile-home-btn" id="mobileHomeBtn" aria-label="На главную">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
             </button>
-            <!-- Кнопка меню (сайдбар) -->
             <button class="mobile-header-btn" id="mobileMenuBtn" aria-label="Меню">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <rect x="3" y="3" width="18" height="18" rx="3"/>
@@ -951,7 +976,6 @@
                 homeContent.classList.add('hidden');
                 toolFrameContainer.classList.add('active');
                 toolFrame.src = url;
-                // Добавляем класс tool-open к body, чтобы показать кнопку "Домой"
                 bodyEl.classList.add('tool-open');
             }
 
@@ -980,7 +1004,6 @@
                 closeSidebar();
             });
 
-            // Подменю: ссылки с data-tool
             document.querySelectorAll('.sidebar-submenu a[data-tool]').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -990,7 +1013,6 @@
                 });
             });
 
-            // Карточки: основная область (data-tool на самой карточке)
             document.querySelectorAll('.tool-card[data-tool]').forEach(card => {
                 card.addEventListener('click', (e) => {
                     if (e.target.closest('.tool-new-tab-link')) return;

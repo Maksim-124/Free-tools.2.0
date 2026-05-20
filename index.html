@@ -773,6 +773,14 @@
             </button>
             <ul class="sidebar-submenu open" id="toolsSubmenu">
                 <li>
+                    <a href="#" data-tool="tools/текстред/index.html">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        <span>ТекстРед</span>
+                    </a>
+                </li>                
+                <li>
                     <a href="#" data-tool="tools/колорпро/index.html">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
@@ -829,6 +837,25 @@
 
             <!-- Tools Grid -->
             <section class="tools-grid">
+                <!-- ТекстРед -->
+                <div class="tool-card fade-up delay-400" data-tool="tools/текстред/index.html">
+                    <a href="#" class="tool-card-main-link" aria-label="ТекстРед — открыть в этой вкладке"></a>
+                    <div class="tool-card-body">
+                        <div class="tool-icon" style="color: #2563eb; background-color: #eff6ff;">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                        </div>
+                        <h2>ТекстРед</h2>
+                        <p>Простой текстовый редактор .txt с автосохранением, валидацией имён и скачиванием. Работает офлайн, без сервера.</p>
+                        <a href="tools/текстред/index.html" target="_blank" class="tool-new-tab-link" style="color: #2563eb;">
+                            Открыть в новой вкладке
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
                 <!-- КолорПро -->
                 <div class="tool-card fade-up delay-100" data-tool="tools/колорпро/index.html">
                     <a href="#" class="tool-card-main-link" aria-label="КолорПро — открыть в этой вкладке"></a>
@@ -897,7 +924,7 @@
 
         <!-- Tool iframe container -->
         <div id="toolFrameContainer" class="tool-frame-container">
-           <iframe id="toolFrame" class="tool-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals" title="Инструмент"></iframe>
+           <iframe id="toolFrame" class="tool-frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-downloads" title="Инструмент"></iframe>
         </div>
     </main>
 
